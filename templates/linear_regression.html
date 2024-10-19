@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linear Model</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Linear Regression</h1>
+        </header>
+        <main class="dashboard">
+            <section class="result-section">
+                {% if mse %}
+                <h2>MSE: {{ mse }}</h2>
+                <h3>Accuracy Matrix</h3>
+                <div class="matrix">{{ accuracy_matrix|safe }}</div>
+                {% else %}
+                <h2>Linear Regression</h2>
+                {% endif %}
+            </section>
+
+            <section class="upload-section">
+                <h2>Upload Dataset</h2>
+                <form action="{{ url_for('linear_regression') }}" method="post" enctype="multipart/form-data" class="upload-form">
+                    <label for="dataset">Upload Dataset (CSV):</label>
+                    <input type="file" id="dataset" name="dataset" accept=".csv" required>
+                    <button type="submit">Train Model</button>
+                </form>
+                {% if feature_columns %}
+
+                    <h2>Make Predictions</h2>
+                    <form action="{{ url_for('linear_regression') }}" method="POST" class="prediction-form">
+                        {% for i in range(0, feature_columns|length, 2) %}
+                            <div class="input-group">
+                                <label for="{{ feature_columns[i] }}">{{ feature_columns[i] }}</label>
+                                <input type="text" id="{{ feature_columns[i] }}" name="{{ feature_columns[i] }}" required placeholder="Enter {{ feature_columns[i] }}" value="{{ request.form.get(feature_columns[i]) }}">
+                            </div>
+                            {% if i + 1 < feature_columns|length %}
+                            <div class="input-group">
+                                <label for="{{ feature_columns[i + 1] }}">{{ feature_columns[i + 1] }}</label>
+                                <input type="text" id="{{ feature_columns[i + 1] }}" name="{{ feature_columns[i + 1] }}" required placeholder="Enter {{ feature_columns[i + 1] }}" value="{{ request.form.get(feature_columns[i + 1]) }}">
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                        <button type="submit">Predict</button>
+                    </form>
+                    {% if prediction_result is not none %}
+                        <div class="prediction-result">
+                            <h3>Prediction Result: {{ prediction_result }}</h3>
+                        </div>
+                    {% endif %}
+
+                {% endif %}
+            </section>
+        </main>
+        <footer>
+            <p>&copy; 2024 Machine Learning</p>
+        </footer>
+    </div>
+</body>
+</html>

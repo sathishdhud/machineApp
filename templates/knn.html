@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KNN Classifier</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Basic styling for input form layout */
+        .prediction-form {
+            display: flex;
+            flex-wrap: wrap; /* Allows wrapping of input fields */
+            gap: 20px; /* Space between input groups */
+        }
+
+        .input-group {
+            flex: 1 1 calc(50% - 20px); /* Two inputs per row with gap considered */
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 5px;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .prediction-result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: green; /* Change color as desired */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>KNN Classifier</h1>
+        </header>
+        <main class="dashboard">
+            <section class="result-section">
+                {% if accuracy is not none %}
+                    <h2>Model Accuracy: {{ accuracy * 100 | round(2) }}%</h2>
+                    <h3>Accuracy Matrix</h3>
+                    <div class="matrix">{{ accuracy_matrix|safe }}</div>
+                {% else %}
+                    <h2>No Accuracy Data Available</h2>
+                {% endif %}
+            </section>
+
+            <section class="upload-section">
+                <h2>Upload Dataset</h2>
+                <form action="{{ url_for('knn') }}" method="post" enctype="multipart/form-data" class="upload-form">
+                    <label for="dataset">Upload Dataset (CSV):</label>
+                    <input type="file" id="dataset" name="dataset" accept=".csv" required>
+                    <button type="submit">Train Model</button>
+                </form>
+                {% if feature_columns %}
+
+                    <h2>Make Predictions</h2>
+                    <form action="{{ url_for('knn') }}" method="POST" class="prediction-form">
+                        {% for i in range(0, feature_columns|length, 2) %}
+                            <div class="input-group">
+                                <label for="{{ feature_columns[i] }}">{{ feature_columns[i] }}</label>
+                                <input type="text" id="{{ feature_columns[i] }}" name="{{ feature_columns[i] }}" required placeholder="Enter {{ feature_columns[i] }}" value="{{ request.form.get(feature_columns[i]) }}">
+                            </div>
+                            {% if i + 1 < feature_columns|length %}
+                            <div class="input-group">
+                                <label for="{{ feature_columns[i + 1] }}">{{ feature_columns[i + 1] }}</label>
+                                <input type="text" id="{{ feature_columns[i + 1] }}" name="{{ feature_columns[i + 1] }}" required placeholder="Enter {{ feature_columns[i + 1] }}" value="{{ request.form.get(feature_columns[i + 1]) }}">
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                        <button type="submit">Predict</button>
+                    </form>
+					
+                    {% if prediction_result is not none %}
+                        <div class="prediction-result">
+                            <h3>Prediction Result: {{ prediction_result }}</h3>
+                        </div>
+                    {% endif %}
+
+                {% endif %}
+				{% if confusion_matrix is not none %}
+    <section class="confusion-matrix-section">
+        <h3>Confusion Matrix</h3>
+        <div class="matrix">{{ confusion_matrix|safe }}</div>
+{% endif %}
+        </main>
+        <footer>
+            <p>&copy; 2024 Machine Learning Dashboard</p>
+        </footer>
+    </div>
+</body>
+</html>
